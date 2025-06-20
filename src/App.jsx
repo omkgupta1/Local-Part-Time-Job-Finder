@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Login from './login.jsx';
 import Register from './register.jsx';
 import SeekerHome from "./SeekerHome.jsx";
+import EmployerHome from "./EmployerHome.jsx";
 
 function Home() {
   return (
@@ -44,6 +45,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/seeker/dashboard" element={<SeekerHome />} />
+        <Route path="/employer/dashboard" element={<EmployerHome />} />
       </Routes>
     </Router>
   );
