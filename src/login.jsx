@@ -1,6 +1,8 @@
 //ouwdwidbwid
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // optional
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom"; // at the top with other imports
+ // optional
 
 const Login = () => {
   const [role, setRole] = useState("student");
@@ -105,9 +107,10 @@ const Login = () => {
 
         <p className="text-sm mt-4 text-center text-gray-400">
           Don't have an account?{" "}
-          <a href="/register" className="text-blue-400 hover:underline">
-            Register here
-          </a>
+          <Link to="/register" className="text-blue-400 hover:underline">
+              Register here
+          </Link>
+
         </p>
       </div>
     </div>
