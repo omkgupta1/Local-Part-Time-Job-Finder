@@ -1,7 +1,7 @@
-import pool from "../config/db.js";
-import { hashPassword, comparePassword } from "../utils/hash.js";
+const pool = require("../config/db");
+const { hashPassword, comparePassword } = require("../utils/hash");
 
-export const signup = async (req, res) => {
+exports.signup = async (req, res) => {
   const { name, email, password, phone, role } = req.body;
 
   try {
@@ -26,7 +26,7 @@ export const signup = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+exports.login = async (req, res) => {
   const { email, password, role } = req.body;
 
   try {
