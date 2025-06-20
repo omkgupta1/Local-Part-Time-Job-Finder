@@ -1,11 +1,8 @@
-//ouwdwidbwid
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom"; // at the top with other imports
- // optional
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
-  const [role, setRole] = useState("student");
+  const [role, setRole] = useState("seeker");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -20,7 +17,6 @@ const Login = () => {
     }
 
     try {
-      // Replace with your real login API
       const res = await fetch("/api/login", {
         method: "POST",
         headers: {
@@ -34,11 +30,10 @@ const Login = () => {
       if (!res.ok) {
         setError(data.message || "Invalid credentials");
       } else {
-        // Store token or session info as needed
         localStorage.setItem("token", data.token);
 
         // Redirect based on role
-        if (role === "student") navigate("/student/dashboard");
+        if (role === "seeker") navigate("/seeker/dashboard");
         else if (role === "employer") navigate("/employer/dashboard");
         else navigate("/admin/dashboard");
       }
@@ -67,7 +62,7 @@ const Login = () => {
               onChange={(e) => setRole(e.target.value)}
               className="w-full p-2 rounded bg-gray-700 text-white"
             >
-              <option value="student">Student</option>
+              <option value="seeker">Seeker</option>
               <option value="employer">Employer</option>
               <option value="admin">Admin</option>
             </select>
@@ -108,14 +103,12 @@ const Login = () => {
         <p className="text-sm mt-4 text-center text-gray-400">
           Don't have an account?{" "}
           <Link to="/register" className="text-blue-400 hover:underline">
-              Register here
+            Register here
           </Link>
-
         </p>
       </div>
     </div>
   );
 };
-
 
 export default Login;

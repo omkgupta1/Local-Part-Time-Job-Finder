@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [role, setRole] = useState("student");
+  const [role, setRole] = useState("seeker");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    college: "", // student
-    course: "",  // student
+    education: "",  // seeker
+    skills: "",     // seeker
     companyName: "", // employer
     industry: "",    // employer
   });
@@ -73,7 +73,7 @@ const Register = () => {
               onChange={(e) => setRole(e.target.value)}
               className="w-full p-2 rounded bg-gray-700 text-white"
             >
-              <option value="student">Student</option>
+              <option value="seeker">Seeker</option>
               <option value="employer">Employer</option>
             </select>
           </div>
@@ -131,28 +131,28 @@ const Register = () => {
           </div>
 
           {/* Conditional Fields */}
-          {role === "student" && (
+          {role === "seeker" && (
             <>
               <div>
-                <label className="block mb-1 font-semibold">College</label>
+                <label className="block mb-1 font-semibold">Education</label>
                 <input
-                  name="college"
+                  name="education"
                   type="text"
-                  value={formData.college}
+                  value={formData.education}
                   onChange={handleChange}
                   className="w-full p-2 rounded bg-gray-700 text-white"
-                  placeholder="Enter college name"
+                  placeholder="e.g., B.Sc. IT, final year"
                 />
               </div>
               <div>
-                <label className="block mb-1 font-semibold">Course</label>
+                <label className="block mb-1 font-semibold">Skills</label>
                 <input
-                  name="course"
+                  name="skills"
                   type="text"
-                  value={formData.course}
+                  value={formData.skills}
                   onChange={handleChange}
                   className="w-full p-2 rounded bg-gray-700 text-white"
-                  placeholder="Enter your course"
+                  placeholder="e.g., HTML, CSS, MS Excel"
                 />
               </div>
             </>
@@ -179,7 +179,7 @@ const Register = () => {
                   value={formData.industry}
                   onChange={handleChange}
                   className="w-full p-2 rounded bg-gray-700 text-white"
-                  placeholder="e.g., IT, Retail, Finance"
+                  placeholder="e.g., IT, Retail, Design"
                 />
               </div>
             </>
