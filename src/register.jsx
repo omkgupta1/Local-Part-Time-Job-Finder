@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 const Register = () => {
   const [role, setRole] = useState("seeker");
   const [formData, setFormData] = useState({
-    name: "",
+    full_name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -22,9 +22,9 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const { name, email, password, confirmPassword } = formData;
+    const { full_name, email, password, confirmPassword } = formData;
 
-    if (!name || !email || !password || !confirmPassword) {
+    if (!full_name || !email || !password || !confirmPassword) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -82,9 +82,9 @@ const Register = () => {
           <div>
             <label className="block mb-1 font-semibold">Full Name</label>
             <input
-              name="name"
+              name="full_name"
               type="text"
-              value={formData.name}
+              value={formData.full_name}
               onChange={handleChange}
               className="w-full p-2 rounded bg-gray-700 text-white"
               placeholder="Enter your name"

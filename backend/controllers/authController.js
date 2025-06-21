@@ -1,56 +1,126 @@
-const pool = require("../config/db");
-const { hashPassword, comparePassword } = require("../utils/hash");
+import pool from "../config/db.js";
+import { hashPassword, comparePassword } from "../utils/hash.js";
 
-exports.signup = async (req, res) => {
-  const { name, email, password, phone, role } = req.body;
+export const register = async (req, res) => {
+  const {
+    full_name,
+    email,
+    password,
+    role,
+    phone = null,
+    education = null,
+    skills = null,
+    companyName = null,
+    industry = null
+  } = req.body;
+
+  if (!full_name || !email || !password || !role) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
 
   try {
-    const hashedPwd = await hashPassword(password);
-    let sql;
+    // Check if user already exists
+    const [existingUser] = await pool.execute(
+      "SELECT * FROM Users WHERE email = ?",
+      [email]
+    );
 
-    if (role === "student") {
-      sql = "INSERT INTO Students (name, email, password, phone) VALUES (?, ?, ?, ?)";
-    } else if (role === "employer") {
-      sql = "INSERT INTO Employers (name, email, password, phone, organization_name) VALUES (?, ?, ?, ?, ?)";
-    } else {
-      return res.status(400).json({ message: "Invalid role" });
+    if (existingUser.length > 0) {
+      return res.status(400).json({ message: "Email already registered" });
     }
 
-    await pool.execute(sql, role === "student"
-      ? [name, email, hashedPwd, phone]
-      : [name, email, hashedPwd, phone, ""]);
+    const hashedPwd = await hashPassword(password);
 
-    res.status(201).json({ message: "Signup successful" });
+    // Insert into Users
+    const [result] = await pool.execute(
+      "INSERT INTO Users (full_name, email, password, role, phone) VALUES (?, ?, ?, ?, ?)",
+      [full_name, email, hashedPwd, role, phone]
+    );
+
+    const userId = result.insertId;
+
+    if (role === "seeker") {
+      await pool.execute(
+        "INSERT INTO Seekers (user_id, education, skills) VALUES (?, ?, ?)",
+        [userId, education, skills]
+      );
+    } else if (role === "employer") {
+      await pool.execute(
+        "INSERT INTO Employers (user_id, company_name, industry) VALUES (?, ?, ?)",
+        [userId, companyName, industry]
+      );
+    }
+
+    res.status(201).json({
+      message: "Registration successful",
+      user: {
+        id: userId,
+        name: full_name,
+        email,
+        role
+      }
+    });
+
   } catch (err) {
-    res.status(500).json({ message: "Signup error", error: err.message });
+    console.error("Registration error:", err);
+    res.status(500).json({ message: "Registration failed", error: err.message || err });
   }
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password, role } = req.body;
 
   try {
-    let sql, user;
-    if (role === "student") {
-      sql = "SELECT * FROM Students WHERE email = ?";
-    } else if (role === "employer") {
-      sql = "SELECT * FROM Employers WHERE email = ?";
-    } else if (role === "admin") {
-      sql = "SELECT * FROM Admin WHERE email = ?";
-    } else {
-      return res.status(400).json({ message: "Invalid role" });
+    // Check user exists and has the correct role
+    const [users] = await pool.execute(
+      "SELECT * FROM Users WHERE email = ? AND role = ?",
+      [email, role]
+    );
+    
+    if (users.length === 0) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const [rows] = await pool.execute(sql, [email]);
-    user = rows[0];
-
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
-
+    const user = users[0];
+    
+    // Verify password
     const isMatch = await comparePassword(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
-    res.status(200).json({ message: "Login successful", token: `mock-token-${role}-${user.email}` });
+    // Get role-specific data if needed
+    let roleData = {};
+    if (role === "seeker") {
+      const [seeker] = await pool.execute(
+        "SELECT * FROM Seekers WHERE user_id = ?",
+        [user.user_id]
+      );
+      roleData = seeker[0];
+    } else if (role === "employer") {
+      const [employer] = await pool.execute(
+        "SELECT * FROM Employers WHERE user_id = ?",
+        [user.user_id]
+      );
+      roleData = employer[0];
+    }
+
+    // In a real app, generate a proper JWT token here
+    const token = `mock-token-${user.user_id}-${Date.now()}`;
+
+    res.status(200).json({ 
+      message: "Login successful",
+      token,
+      user: {
+        id: user.user_id,
+        name: user.full_name,
+        email: user.email,
+        role: user.role,
+        ...roleData
+      }
+    });
   } catch (err) {
-    res.status(500).json({ message: "Login error", error: err.message });
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Login failed", error: err.message });
   }
 };
