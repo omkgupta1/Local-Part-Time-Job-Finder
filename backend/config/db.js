@@ -1,9 +1,9 @@
 import mysql from "mysql2/promise";
 
 const pool = mysql.createPool({
-  host: "localhost",
+  host: "127.0.0.1",
   user: "root",
-  password: "WJNI@TIN", // your MySQL password
+  password: "Aayush@2003", // your MySQL password
   database: "job_finder",
 });
 
