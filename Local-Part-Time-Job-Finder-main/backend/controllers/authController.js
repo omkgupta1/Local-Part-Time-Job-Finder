@@ -330,8 +330,42 @@ export const login = async (req, res) => {
         }
       });
       return;
+    } else if (role === "seeker") {
+      // Seeker login logic
+      const [users] = await pool.execute(
+        "SELECT * FROM Users WHERE email = ? AND role = ?",
+        [email, role]
+      );
+      if (users.length === 0) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      const user = users[0];
+      const isMatch = await comparePassword(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      // Fetch seeker-specific info
+      const [seeker] = await pool.execute(
+        "SELECT education, skills FROM Seekers WHERE user_id = ?",
+        [user.user_id]
+      );
+      const seekerData = seeker[0] || {};
+      const token = `mock-token-${user.user_id}-${Date.now()}`;
+      res.status(200).json({
+        message: "Login successful",
+        token,
+        user: {
+          id: user.user_id,
+          name: user.full_name,
+          email: user.email,
+          role: user.role,
+          ...seekerData
+        }
+      });
+      return;
     }
-    // ... existing seeker/admin login logic ...
+    // Optionally, add admin logic here if needed
+    return res.status(400).json({ message: "Invalid role" });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Login failed", error: err.message });
